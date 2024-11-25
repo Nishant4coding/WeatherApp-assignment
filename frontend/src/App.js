@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Card, Header } from "./components/custom/Article";
 
 const App = () => {
   const [articles, setArticles] = useState([]);
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
+  // Fetch articles on component mount
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -17,36 +20,35 @@ const App = () => {
     fetchArticles();
   }, []);
 
+  // Update the `theme` class on `body` when theme changes
+  useEffect(() => {
+    document.body.className =
+      theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black";
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  // Toggle theme between "light" and "dark"
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 p-5">
-      <h1 className="text-3xl font-bold text-center mb-5">News Application</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-        {articles.map((article) => (
-          <div
-            key={article.id}
-            className="bg-white shadow-md rounded-lg overflow-hidden"
-          >
-            <img
-              src={article.image}
-              alt={article.title}
-              className="w-full h-48 object-cover"
+    <>
+      <Header theme={theme} setTheme={setTheme} />
+      <div className={`mx-auto p-4`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {articles.map((article, index) => (
+            <Card
+              key={index}
+              image={article.image}
+              title={article.title}
+              text={article.text}
+              button={article.button}
             />
-            <div className="p-4">
-              <h2 className="text-xl font-semibold">{article.title}</h2>
-              <p className="text-gray-700 my-2">{article.description}</p>
-              <a
-                href={article.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                Read more
-              </a>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
